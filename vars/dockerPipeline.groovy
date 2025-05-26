@@ -1,59 +1,39 @@
 def call() {
-    def dockerx = new org.lab3.docker()
-    pipeline {
-        agent {
-            label 'agent1'
-        }
-
+    node('agent1') {
         tools {
             jdk "java-8"
         }
 
-        environment {
-            DOCKER_USER = credentials('docker-user')
-            DOCKER_PASS = credentials('docker-pass')
-        }
+        withCredentials([usernamePassword(credentialsId: 'docker-user', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
 
-        stages {
             stage('Login to DockerHub') {
-                steps {
-                    script {
-                        dockerx.login(env.DOCKER_USER, env.DOCKER_PASS)
-                    }
-                }
+                sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS}"
             }
 
             stage('Clone Repositories') {
-                steps {
-                    script {
-                        dockerx.gitClone('https://github.com/oelghareeb/java.git', 'master', 'java')
-                        dockerx.gitClone('https://github.com/oelghareeb/python-CI-CD.git', 'main', 'python')
-                    }
-                }
+                sh "rm -rf java"
+                sh "git clone --branch master https://github.com/oelghareeb/java.git java"
+
+                sh "rm -rf python"
+                sh "git clone --branch main https://github.com/oelghareeb/python-CI-CD.git python"
             }
 
             stage('Build and Push Docker Images') {
-                parallel {
-                    stage('Java Image') {
-                        steps {
-                            script {
-                                dockerx.buildJava()
-                                dockerx.push('oelghareeb/java-app', 'latest')
-                            }
+                parallel(
+                    "Java Image": {
+                        dir('java') {
+                            sh "mvn clean package -DskipTests"
+                            sh "docker build -t oelghareeb/java-app-groovyscript:latest ."
+                            sh "docker push oelghareeb/java-app-groovyscript:latest"
+                        }
+                    },
+                    "Python Image": {
+                        dir('python') {
+                            sh "docker build -t oelghareeb/python-app-groovyscript:latest ."
+                            sh "docker push oelghareeb/python-app-groovyscript:latest"
                         }
                     }
-
-                    stage('Python Image') {
-                        steps {
-                            dir('python') {
-                                script {
-                                    dockerx.build('oelghareeb/python-app', 'latest')
-                                    dockerx.push('oelghareeb/python-app', 'latest')
-                                }
-                            }
-                        }
-                    }
-                }
+                )
             }
         }
     }
