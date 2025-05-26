@@ -1,4 +1,4 @@
-package org.lab3
+package org.lab3;
 
 class DockerPipeline implements Serializable {
     def script
@@ -9,8 +9,6 @@ class DockerPipeline implements Serializable {
 
     def runPipeline() {
         script.node('agent1') {
-            script.checkout = {}
-
             script.tools {
                 jdk "java-8"
             }
