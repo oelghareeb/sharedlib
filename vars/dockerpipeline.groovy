@@ -1,4 +1,4 @@
-// vars/dockerx.groovy
+// vars/dockerpipeline.groovy
 
 def call() {
     pipeline {
@@ -39,6 +39,7 @@ def call() {
                         steps {
                             dir('java') {
                                 sh '''
+                                    mvn clean package -DskipTests
                                     docker build -t oelghareeb/java-app .
                                     docker push oelghareeb/java-app:latest
                                 '''
