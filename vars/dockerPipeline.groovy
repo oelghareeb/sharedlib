@@ -3,21 +3,20 @@ def call() {
         tools {
             jdk "java-8"
         }
-        
-        withCredentials([usernamePassword(credentialsId: 'docker-user', usernameVariable: 'docker-user', passwordVariable: 'docker-pass')]) {
-            
+        withCredentials([usernamePassword(credentialsId: 'docker-user', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+
             stage('Login to DockerHub') {
                 sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
             }
-    
+
             stage('Clone Repositories') {
                 sh "rm -rf java"
                 sh "git clone --branch master https://github.com/oelghareeb/java.git java"
-    
+
                 sh "rm -rf python"
                 sh "git clone --branch main https://github.com/oelghareeb/python-CI-CD.git python"
             }
-    
+
             stage('Build and Push Docker Images') {
                 parallel(
                     "Java Image": {
