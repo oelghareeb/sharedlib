@@ -16,6 +16,12 @@ def call() {
         }
 
         stages {
+            stage('Clean Workspace') {
+                steps {
+                    sh 'rm -rf java python'
+                }
+            }
+
             stage('Login to DockerHub') {
                 steps {
                     sh """
