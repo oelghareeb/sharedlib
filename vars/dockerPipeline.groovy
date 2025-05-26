@@ -1,8 +1,8 @@
 def call() {
     node('agent1') {
-        tools {
-            jdk "java-8"
-        }
+        def jdkHome = tool name: 'java-8', type: 'jdk'
+        env.JAVA_HOME = jdkHome
+        env.PATH = "${jdkHome}/bin:${env.PATH}"
 
         withCredentials([usernamePassword(credentialsId: 'docker-user', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
 
