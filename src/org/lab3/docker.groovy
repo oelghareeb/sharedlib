@@ -16,3 +16,13 @@ def gitClone(String repoUrl, String branch = 'main', String targetDir = '.') {
     sh "rm -rf ${targetDir}"
     sh "git clone --branch ${branch} ${repoUrl} ${targetDir}"
 }
+
+// build the Java app Docker image due to issue in the building
+def buildJava(){
+    dir('java') {
+        // Build the jar using Maven
+        sh "mvn clean package -DskipTests"
+        // Now build the docker image, with current dir as context so Docker can find target/demo1-0.0.1-SNAPSHOT.jar
+        sh "docker build -t oelghareeb/java-app:latest ."
+    }
+}
