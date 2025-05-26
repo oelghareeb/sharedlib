@@ -9,6 +9,8 @@ class DockerPipeline implements Serializable {
 
     def runPipeline() {
         script.node('agent1') {
+            script.checkout = {}
+
             script.tools {
                 jdk "java-8"
             }
