@@ -13,5 +13,6 @@ def push(IMAGE_NAME, IMAGE_TAG){
 }
 
 def gitClone(String repoUrl, String branch = 'main', String targetDir = '.') {
+    sh "rm -rf ${targetDir}"
     sh "git clone --branch ${branch} ${repoUrl} ${targetDir}"
 }
