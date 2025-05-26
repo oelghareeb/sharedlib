@@ -1,23 +1,23 @@
 def call() {
     node('agent1') {
-        def jdkHome = tool name: 'java-8', type: 'jdk'
-        env.JAVA_HOME = jdkHome
-        env.PATH = "${jdkHome}/bin:${env.PATH}"
-
-        withCredentials([usernamePassword(credentialsId: 'docker-user', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-
+        tools {
+            jdk "java-8"
+        }
+        
+        withCredentials([usernamePassword(credentialsId: 'docker-user', usernameVariable: 'docker-user', passwordVariable: 'docker-pass')]) {
+            
             stage('Login to DockerHub') {
-                sh "docker login -u ${env.DOCKER_USER} -p ${env.DOCKER_PASS}"
+                sh "docker login -u ${DOCKER_USER} -p ${DOCKER_PASS}"
             }
-
+    
             stage('Clone Repositories') {
                 sh "rm -rf java"
                 sh "git clone --branch master https://github.com/oelghareeb/java.git java"
-
+    
                 sh "rm -rf python"
                 sh "git clone --branch main https://github.com/oelghareeb/python-CI-CD.git python"
             }
-
+    
             stage('Build and Push Docker Images') {
                 parallel(
                     "Java Image": {
